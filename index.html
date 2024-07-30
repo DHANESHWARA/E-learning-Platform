@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>E-learning Platform</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="container">
+    <h1>E-learning Platform</h1>
+    <div class="form-container">
+      <button onclick="showForm('register')">Register</button>
+      <button onclick="showForm('login')">Login</button>
+      <button onclick="showForm('create-course')">Create Course</button>
+      <button onclick="showForm('enroll')">Enroll in Course</button>
+      <button onclick="getCourses()">View Courses</button>
+
+      <div id="register-form" class="form">
+        <h2>Register</h2>
+        <input type="text" id="register-username" placeholder="Username">
+        <input type="password" id="register-password" placeholder="Password">
+        <input type="text" id="register-role" placeholder="Role (student/instructor)">
+        <button onclick="register()">Submit</button>
+      </div>
+
+      <div id="login-form" class="form">
+        <h2>Login</h2>
+        <input type="text" id="login-username" placeholder="Username">
+        <input type="password" id="login-password" placeholder="Password">
+        <button onclick="login()">Submit</button>
+      </div>
+
+      <div id="create-course-form" class="form">
+        <h2>Create Course</h2>
+        <input type="text" id="course-title" placeholder="Course Title">
+        <input type="text" id="course-description" placeholder="Course Description">
+        <button onclick="createCourse()">Submit</button>
+      </div>
+
+      <div id="enroll-form" class="form">
+        <h2>Enroll in Course</h2>
+        <input type="text" id="course-id" placeholder="Course ID">
+        <button onclick="enroll()">Submit</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function showForm(formId) {
+      document.querySelectorAll('.form').forEach(form => form.style.display = 'none');
+      document.getElementById(`${formId}-form`).style.display = 'block';
+    }
+
+    async function register() {
+      const username = document.getElementById('register-username').value;
+      const password = document.getElementById('register-password').value;
+      const role = document.getElementById('register-role').value;
+      const response = await fetch('/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password, role }),
+      });
+      alert(await response.text());
+    }
+
+    async function login() {
+      const username = document.getElementById('login-username').value;
+      const password = document.getElementById('login-password').value;
+      const response = await fetch('/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password }),
+      });
+      const data = await response.json();
+      localStorage.setItem('token', data.token);
+      alert('Logged in');
+    }
+
+    async function createCourse() {
+      const title = document.getElementById('course-title').value;
+      const description = document.getElementById('course-description').value;
+      const token = localStorage.getItem('token');
+      const response = await fetch('/course', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token, title, description }),
+      });
+      alert(await response.text());
+    }
+
+    async function enroll() {
+      const courseId = document.getElementById('course-id').value;
+      const token = localStorage.getItem('token');
+      const response = await fetch('/enroll', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token, courseId }),
+      });
+      alert(await response.text());
+    }
+
+    async function getCourses() {
+      const response = await fetch('/courses');
+      const courses = await response.json();
+      alert(JSON.stringify(courses));
+    }
+  </script>
+</body>
+</html>
